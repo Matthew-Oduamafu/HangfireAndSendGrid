@@ -27,12 +27,33 @@ public class EmailSenderService : IEmailSenderService
             email.PlainContent, email.HtmlContent);
         var response = await client.SendEmailAsync(msg);
 
-        if (response.IsSuccessStatusCode != true)
-        {
-            Console.WriteLine("Email wasn't sent");
-            Console.WriteLine($"status code {response.StatusCode}");
-            Console.WriteLine(response.ToString());
-        }
+        if (response.IsSuccessStatusCode)
+            return response.StatusCode is HttpStatusCode.Accepted or HttpStatusCode.OK;
+        
+        Console.WriteLine("Email wasn't sent");
+        Console.WriteLine($"status code {response.StatusCode}");
+        Console.WriteLine(response.ToString());
+
+        return response.StatusCode is HttpStatusCode.Accepted or HttpStatusCode.OK;
+    }
+
+    public async Task<bool> SendEmailAsync(IReadOnlyList<User> users, string subject, string plaintext, string htmlContext)
+    {
+        var client = new SendGridClient(_emailSetting.ApiKey);
+
+        var tos = users.Select(u=> new EmailAddress {Name = u.Name, Email = u.EmailAddress});
+        var from = new EmailAddress {Name = _emailSetting.FromName, Email = _emailSetting.FromAddress};
+
+        var msg = MailHelper.CreateSingleEmailToMultipleRecipients(from, tos.ToList(), subject,
+            plaintext, htmlContext);
+        var response = await client.SendEmailAsync(msg);
+
+        if (response.IsSuccessStatusCode)
+            return response.StatusCode is HttpStatusCode.Accepted or HttpStatusCode.OK;
+        
+        Console.WriteLine("Email wasn't sent");
+        Console.WriteLine($"status code {response.StatusCode}");
+        Console.WriteLine(response.ToString());
 
         return response.StatusCode is HttpStatusCode.Accepted or HttpStatusCode.OK;
     }

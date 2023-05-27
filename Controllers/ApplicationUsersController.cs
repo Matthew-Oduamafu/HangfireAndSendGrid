@@ -41,13 +41,15 @@ public class ApplicationUsersController : ControllerBase
             {
                 ToName = user.Name,
                 To = user.EmailAddress,
-                HtmlContent = "Hello world for text",
-                PlainContent = "Hello world for text"
+                Subject = "Email Services Using SendGrid",
+                HtmlContent = EmailTemplates.HtmlEmailTemplate,
+                PlainContent = EmailTemplates.HtmlEmailTemplate
             };
 
-            // var jobId = BackgroundJob.Enqueue<IEmailSenderService>(x => x.SendEmailAsync(email));
-            var result = await _emailSenderService.SendEmailAsync(email);
-            if (result) Console.WriteLine("Email sent successfully");
+            var jobId = BackgroundJob.Enqueue<IEmailSenderService>(x => x.SendEmailAsync(email));
+            
+            // var result = await _emailSenderService.SendEmailAsync(email);
+            // if (result) Console.WriteLine("Email sent successfully");
         }
         catch (Exception ex)
         {

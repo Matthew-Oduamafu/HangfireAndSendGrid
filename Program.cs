@@ -15,6 +15,7 @@ builder.Services.ConfigureOptions<DatabaseOptionSetup>();
 builder.Services.ConfigureOptions<EmailSettingSetup>();
 
 builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
+builder.Services.AddTransient<IServiceManagement, ServiceManagement>();
 
 
 // add dbcontext
@@ -80,5 +81,11 @@ app.MapHangfireDashboard("/hanfire", new DashboardOptions
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+#pragma warning disable CS0618
+// send news letter mail in every 2 minutes interval
+RecurringJob.AddOrUpdate<IServiceManagement>(x => x.SendBatchMail(), "0 */2 * ? * *");
+#pragma warning restore CS0618
 
 app.Run();
